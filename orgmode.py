@@ -5,7 +5,7 @@ from config import Config
 class Orgmode:
 	def __init__(self):
 		self.dir = unicode(Config().value('orgmode/dir').toString())
-	
+
 	def getTodos(self):
 		ls = filter(lambda x: x.endswith('.org'), os.listdir(self.dir))
 		result = list()

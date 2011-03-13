@@ -1,10 +1,13 @@
 from config import Config
 import feedparser
+import urlparse
 import re
 
 class Redmine:
 	def __init__(self):
 		self.url = unicode(Config().value('redmine/url').toString())
+		if urlparse.urlparse(self.url).scheme == '':
+			raise Exception('Redmine URL is invalid or empty')
 		self.title = re.compile(r'^(.* - .* #[0-9]+ \(.*\)): (.*)$')
 
 	def explodeTitle(self, entry):

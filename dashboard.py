@@ -6,3 +6,4 @@ todos = reduce(lambda a, e: a + e.getTodos(), mods, [])
 
 for todo in todos:
 	print todo['title']
+	print "\t", todo['subtitle']

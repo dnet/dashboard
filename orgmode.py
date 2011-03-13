@@ -5,6 +5,8 @@ from config import Config
 class Orgmode:
 	def __init__(self):
 		self.dir = unicode(Config().value('orgmode/dir').toString())
+		if not os.path.isdir(self.dir):
+			raise Exception('Org-mode directory is invalid or empty')
 
 	def subtitle(self, parents):
 		return '/'.join(map(Orgnode.Orgnode.Heading, parents))

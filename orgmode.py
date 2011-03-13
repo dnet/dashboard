@@ -19,11 +19,11 @@ class Orgmode:
 			nodes = Orgnode.makelist(fn)
 			parents = list()
 			for node in nodes:
-				if node.Todo() == 'TODO':
-					result.append({'title': node.Heading(), 'deadline': node.Deadline(),
-						'link': 'file://' + fn, 'subtitle': self.subtitle(parents)})
 				lvl = node.Level()
 				while len(parents) >= lvl:
 					parents.pop()
+				if node.Todo() == 'TODO':
+					result.append({'title': node.Heading(), 'deadline': node.Deadline(),
+						'link': 'file://' + fn, 'subtitle': self.subtitle(parents)})
 				parents.append(node)
 		return result

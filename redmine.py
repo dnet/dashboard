@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# redmine.py - extracts open tickets from Redmine (Atom feed)
+# redmine.py - extracts open tickets from Redmine (REST WS)
 #
 # Copyright (c) 2011 András Veres-Szentkirályi
 #
@@ -27,24 +27,34 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 from config import Config
-import feedparser
+from xml.dom.minidom import parseString
+import urllib2
 import urlparse
-import re
+import datetime
 
 class Redmine:
 	def __init__(self):
 		self.url = unicode(Config().value('redmine/url').toString())
 		if urlparse.urlparse(self.url).scheme == '':
 			raise Exception('Redmine URL is invalid or empty')
-		self.title = re.compile(r'^(.* - .* #[0-9]+ \(.*\)): (.*)$')
+		self.urlbase = self.url[:self.url.index('.xml')] + '/';
 
-	def explodeTitle(self, entry):
-		match = self.title.match(entry.title)
-		if match is not None:
-			entry.title = match.group(2)
-			entry.subtitle = match.group(1)
-		return entry
+	def issue2entry(self, issue):
+		dd = issue.getElementsByTagName('due_date')[0]
+		if len(dd.childNodes) == 0:
+			dl = None
+		else:
+			dl = datetime.datetime.strptime(dd.firstChild.data, '%Y-%m-%d').date()
+		return {
+			'subtitle': issue.getElementsByTagName('project')[0].attributes['name'].value,
+			'title': issue.getElementsByTagName('subject')[0].firstChild.data,
+			'link': self.urlbase + issue.getElementsByTagName('id')[0].firstChild.data,
+			'deadline': dl,
+		}
+
+	def getDOM(self):
+		return parseString(urllib2.urlopen(self.url).read())
 
 	def getTodos(self):
-		d = feedparser.parse(self.url)
-		return map(self.explodeTitle, d.entries)
+		return map(self.issue2entry,
+			self.getDOM().documentElement.getElementsByTagName('issue'))

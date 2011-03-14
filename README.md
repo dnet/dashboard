@@ -31,5 +31,4 @@ Dependencies
 
  - Python 2.x (tested on 2.5)
  - PyQt4 (Debian/Ubuntu package: `python-qt4`)
- - Universal Feed Parser (for Redmine module only, Debian/Ubuntu package: `python-feedparser`)
  - Django (Debian/Ubuntu package: `python-django`)

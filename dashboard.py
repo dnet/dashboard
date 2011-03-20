@@ -45,6 +45,14 @@ def loadcfg():
 			sys.exit(1)
 	return cvals
 
+def ensureDateTime(value, default, deftime):
+	if type(value) == datetime.date:
+		return datetime.datetime.combine(value, deftime)
+	elif type(value) != datetime.datetime:
+		return default
+	else:
+		return value
+
 def getTodos(acc, module):
 	mlist = module.getTodos()
 	cn = module.__class__.__name__
@@ -53,14 +61,9 @@ def getTodos(acc, module):
 	dl = datetime.datetime.now() + datetime.timedelta(weeks = 10)
 	for todo in mlist:
 		todo['src'] = cn
-		if 'deadline' not in todo:
-			todo['deadline_cmp'] = dl
-		elif type(todo['deadline']) == datetime.date:
-			todo['deadline_cmp'] = datetime.datetime.combine(todo['deadline'], noon)
-		elif type(todo['deadline']) != datetime.datetime:
-			todo['deadline_cmp'] = dl
-		else:
-			todo['deadline_cmp'] = todo['deadline']
+		todo['deadline_cmp'] = reduce(
+			lambda default, field: ensureDateTime(todo.get(field, default), default, noon),
+			['scheduled', 'deadline'], dl)
 		todo['late'] = todo['deadline_cmp'] < now
 	return acc + mlist
 

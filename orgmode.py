@@ -52,6 +52,7 @@ class Orgmode:
 					parents.pop()
 				if node.Todo() == 'TODO':
 					result.append({'title': node.Heading(), 'deadline': node.Deadline(),
+						'scheduled': node.Scheduled(),
 						'link': 'file://' + fn, 'subtitle': self.subtitle(parents)})
 				parents.append(node)
 		return result

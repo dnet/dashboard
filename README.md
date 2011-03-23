@@ -1,6 +1,8 @@
 Personal dashboard
 ==================
 
+[![Flattr Button](http://api.flattr.com/button/button-static-50x60.png "Flattr This!")](https://flattr.com/thing/153663/Personal-dashboard "Flattr")
+
 Usage
 -----
 

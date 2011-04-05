@@ -37,6 +37,15 @@ import re, sys
 import datetime
 import codecs
 
+def parse_tododate(name, line, default):
+   match = re.search(name + ':\s*<(\d+)\-(\d+)\-(\d+)([\ a-zA-Z]+(\d+):(\d+))?', line)
+   if match:
+      if match.group(5) is None:
+         return datetime.date(*(int(i) for i in match.group(1, 2, 3)))
+      else:
+         return datetime.datetime(*(int(i) for i in match.group(1, 2, 3, 5, 6)))
+   return default
+
 def makelist(filename):
    """
    Read an org-mode file and return a list of Orgnode objects
@@ -107,23 +116,8 @@ def makelist(filename):
            if prop_srch:
               propdict[prop_srch.group(1)] = prop_srch.group(2)
               continue
-           sd_re = re.search('SCHEDULED:\s+<([0-9]+)\-([0-9]+)\-([0-9]+)', line)
-           if sd_re:
-              sched_date = datetime.date(int(sd_re.group(1)),
-                                         int(sd_re.group(2)),
-                                         int(sd_re.group(3)) )
-           dd_re = re.search('DEADLINE:\s*<(\d+)\-(\d+)\-(\d+)([\ a-zA-Z]+(\d+):(\d+))?', line)
-           if dd_re:
-              if dd_re.group(5) is None:
-                 deadline_date = datetime.date(int(dd_re.group(1)),
-                                               int(dd_re.group(2)),
-                                               int(dd_re.group(3)) )
-              else:
-                 deadline_date = datetime.datetime(int(dd_re.group(1)),
-                                                   int(dd_re.group(2)),
-                                                   int(dd_re.group(3)),
-                                                   int(dd_re.group(5)),
-                                                   int(dd_re.group(6)) )
+           sched_date = parse_tododate('SCHEDULED', line, sched_date)
+           deadline_date = parse_tododate('DEADLINE', line, deadline_date)
 
    # write out last node              
    thisNode = Orgnode(level, heading, bodytext, tag1, alltags)

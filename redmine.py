@@ -31,6 +31,9 @@ from xml.dom.minidom import parseString
 import urllib2
 import urlparse
 import datetime
+import cPickle
+from StringIO import StringIO
+import base64
 
 class Redmine:
 	def __init__(self):
@@ -53,8 +56,26 @@ class Redmine:
 		}
 
 	def getDOM(self):
-		return parseString(urllib2.urlopen(self.url).read())
+		cfg = Config()
+		req = urllib2.Request(self.url)
+		req.add_header('If-None-Match', str(cfg.value('redmine/etag').toString()))
+		issues = urllib2.urlopen(req)
+		try:
+			cfg.setValue('redmine/etag', issues.info()['ETag'])
+		except:
+			cfg.remove('redmine/etag')
+		return parseString(issues.read())
 
 	def getTodos(self):
-		return map(self.issue2entry,
-			self.getDOM().documentElement.getElementsByTagName('issue'))
+		try:
+			todos = map(self.issue2entry,
+				self.getDOM().documentElement.getElementsByTagName('issue'))
+			output = StringIO()
+			cPickle.dump(todos, output, -1)
+			Config().setValue('redmine/cache', base64.b64encode(output.getvalue()))
+		except urllib2.HTTPError as e:
+			if e.code != 304:
+				raise
+			todos = cPickle.loads(base64.b64decode(str(
+				Config().value('redmine/cache').toString())))
+		return todos

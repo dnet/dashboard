@@ -29,6 +29,9 @@
 import Orgnode
 import os
 from config import Config
+import cPickle
+from StringIO import StringIO
+import base64
 
 class Orgmode:
 	def __init__(self):
@@ -41,6 +44,14 @@ class Orgmode:
 
 	def getTodos(self):
 		ls = filter(lambda x: x.endswith('.org'), os.listdir(self.dir))
+		if not ls:
+			return list()
+		latest = reduce(lambda a, e: max(a,
+			os.stat(os.path.join(self.dir, e)).st_mtime), ls, 0.0)
+		cfg = Config()
+		if cfg.value('orgmode/latest', 0.0).toDouble()[0] >= latest:
+			return cPickle.loads(base64.b64decode(str(
+				Config().value('orgmode/cache').toString())))
 		result = list()
 		for f in ls:
 			fn = os.path.join(self.dir, f)
@@ -55,4 +66,8 @@ class Orgmode:
 						'scheduled': node.Scheduled(),
 						'link': 'file://' + fn, 'subtitle': self.subtitle(parents)})
 				parents.append(node)
+		cfg.setValue('orgmode/latest', latest)
+		output = StringIO()
+		cPickle.dump(result, output, -1)
+		Config().setValue('orgmode/cache', base64.b64encode(output.getvalue()))
 		return result

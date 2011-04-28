@@ -42,6 +42,21 @@ class Orgmode:
 	def subtitle(self, parents):
 		return '/'.join(map(Orgnode.Orgnode.Heading, parents))
 
+	def parseOrgFile(self, result, filename):
+		fn = os.path.join(self.dir, filename)
+		nodes = Orgnode.makelist(fn)
+		parents = list()
+		for node in nodes:
+			lvl = node.Level()
+			while len(parents) >= lvl:
+				parents.pop()
+			if node.Todo() == 'TODO':
+				result.append({'title': node.Heading(), 'deadline': node.Deadline(),
+					'scheduled': node.Scheduled(),
+					'link': 'file://' + fn, 'subtitle': self.subtitle(parents)})
+			parents.append(node)
+		return result
+
 	def getTodos(self):
 		ls = filter(lambda x: x.endswith('.org'), os.listdir(self.dir))
 		if not ls:
@@ -52,20 +67,7 @@ class Orgmode:
 		if cfg.value('orgmode/latest', 0.0).toDouble()[0] >= latest:
 			return cPickle.loads(base64.b64decode(str(
 				Config().value('orgmode/cache').toString())))
-		result = list()
-		for f in ls:
-			fn = os.path.join(self.dir, f)
-			nodes = Orgnode.makelist(fn)
-			parents = list()
-			for node in nodes:
-				lvl = node.Level()
-				while len(parents) >= lvl:
-					parents.pop()
-				if node.Todo() == 'TODO':
-					result.append({'title': node.Heading(), 'deadline': node.Deadline(),
-						'scheduled': node.Scheduled(),
-						'link': 'file://' + fn, 'subtitle': self.subtitle(parents)})
-				parents.append(node)
+		result = reduce(self.parseOrgFile, ls, list())
 		cfg.setValue('orgmode/latest', latest)
 		output = StringIO()
 		cPickle.dump(result, output, -1)

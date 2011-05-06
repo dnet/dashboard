@@ -66,6 +66,10 @@ class Redmine:
 			cfg.remove('redmine/etag')
 		return parseString(issues.read())
 
+	def getCache(self):
+		return cPickle.loads(base64.b64decode(str(
+			Config().value('redmine/cache').toString())))
+
 	def getTodos(self):
 		try:
 			todos = map(self.issue2entry,
@@ -76,6 +80,5 @@ class Redmine:
 		except urllib2.HTTPError as e:
 			if e.code != 304:
 				raise
-			todos = cPickle.loads(base64.b64decode(str(
-				Config().value('redmine/cache').toString())))
+			todos = self.getCache()
 		return todos

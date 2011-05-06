@@ -32,6 +32,7 @@ from config import Config
 import cPickle
 from StringIO import StringIO
 import base64
+import itertools
 
 class Orgmode:
 	def __init__(self):
@@ -40,7 +41,7 @@ class Orgmode:
 			raise Exception('Org-mode directory is invalid or empty')
 
 	def subtitle(self, parents):
-		return '/'.join(map(Orgnode.Orgnode.Heading, parents))
+		return '/'.join(itertools.imap(Orgnode.Orgnode.Heading, parents))
 
 	def parseOrgFile(self, result, filename):
 		fn = os.path.join(self.dir, filename)

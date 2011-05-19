@@ -33,12 +33,14 @@ import cPickle
 from StringIO import StringIO
 import base64
 import itertools
+import re
 
 class Orgmode:
 	def __init__(self):
 		self.dir = unicode(Config().value('orgmode/dir').toString())
 		if not os.path.isdir(self.dir):
 			raise Exception('Org-mode directory is invalid or empty')
+		self.orgfile = re.compile(r'^[^.][^#].*\.org$')
 
 	def subtitle(self, parents):
 		return '/'.join(itertools.imap(Orgnode.Orgnode.Heading, parents))
@@ -59,7 +61,7 @@ class Orgmode:
 		return result
 
 	def getTodos(self):
-		ls = filter(lambda x: x.endswith('.org'), os.listdir(self.dir))
+		ls = filter(self.orgfile.match, os.listdir(self.dir))
 		if not ls:
 			return list()
 		latest = reduce(lambda a, e: max(a,

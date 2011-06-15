@@ -32,7 +32,6 @@ from django.conf import settings
 from config import Config
 import datetime
 import sys
-import os
 
 def loadcfg():
 	cfg = Config()

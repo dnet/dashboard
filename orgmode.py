@@ -35,15 +35,15 @@ import base64
 import itertools
 import re
 
+def subtitle(parents):
+	return '/'.join(itertools.imap(Orgnode.Orgnode.Heading, parents))
+
 class Orgmode:
 	def __init__(self):
 		self.dir = unicode(Config().value('orgmode/dir').toString())
 		if not os.path.isdir(self.dir):
 			raise Exception('Org-mode directory is invalid or empty')
 		self.orgfile = re.compile(r'^[^.][^#].*\.org$')
-
-	def subtitle(self, parents):
-		return '/'.join(itertools.imap(Orgnode.Orgnode.Heading, parents))
 
 	def parseOrgFile(self, result, filename):
 		fn = os.path.join(self.dir, filename)
@@ -56,7 +56,7 @@ class Orgmode:
 			if node.Todo() == 'TODO':
 				result.append({'title': node.Heading(), 'deadline': node.Deadline(),
 					'scheduled': node.Scheduled(),
-					'link': 'file://' + fn, 'subtitle': self.subtitle(parents)})
+					'link': 'file://' + fn, 'subtitle': subtitle(parents)})
 			parents.append(node)
 		return result
 

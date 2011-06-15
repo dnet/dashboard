@@ -35,6 +35,10 @@ import cPickle
 from StringIO import StringIO
 import base64
 
+def getCache():
+	return cPickle.loads(base64.b64decode(str(
+		Config().value('redmine/cache').toString())))
+
 class Redmine:
 	def __init__(self):
 		self.url = unicode(Config().value('redmine/url').toString())
@@ -65,10 +69,6 @@ class Redmine:
 		except:
 			cfg.remove('redmine/etag')
 		return parseString(issues.read())
-
-	def getCache(self):
-		return cPickle.loads(base64.b64decode(str(
-			Config().value('redmine/cache').toString())))
 
 	def getTodos(self):
 		try:

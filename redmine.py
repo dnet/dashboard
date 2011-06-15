@@ -77,10 +77,10 @@ class Redmine:
 			output = StringIO()
 			cPickle.dump(todos, output, -1)
 			Config().setValue('redmine/cache', base64.b64encode(output.getvalue()))
-		except urllib2.URLError as e:
-			todos = self.getCache()
 		except urllib2.HTTPError as e:
 			if e.code != 304:
 				raise
-			todos = self.getCache()
+			todos = getCache()
+		except urllib2.URLError as e:
+			todos = getCache()
 		return todos

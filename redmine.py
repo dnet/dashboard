@@ -27,7 +27,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 from config import Config
-from xml.dom.minidom import parseString
+from lxml import etree
 import urllib2
 import urlparse
 import datetime
@@ -47,15 +47,15 @@ class Redmine:
 		self.urlbase = self.url[:self.url.index('.xml')] + '/'
 
 	def issue2entry(self, issue):
-		dd = issue.getElementsByTagName('due_date')[0]
-		if len(dd.childNodes) == 0:
+		dd = issue.xpath('due_date/text()')
+		if not dd:
 			dl = None
 		else:
-			dl = datetime.datetime.strptime(dd.firstChild.data, '%Y-%m-%d').date()
+			dl = datetime.datetime.strptime(dd[0], '%Y-%m-%d').date()
 		return {
-			'subtitle': issue.getElementsByTagName('project')[0].attributes['name'].value,
-			'title': issue.getElementsByTagName('subject')[0].firstChild.data,
-			'link': self.urlbase + issue.getElementsByTagName('id')[0].firstChild.data,
+			'subtitle': issue.xpath('project/@name')[0],
+			'title': issue.xpath('subject/text()')[0],
+			'link': self.urlbase + issue.xpath('id/text()')[0],
 			'deadline': dl,
 		}
 
@@ -68,12 +68,11 @@ class Redmine:
 			cfg.setValue('redmine/etag', issues.info()['ETag'])
 		except:
 			cfg.remove('redmine/etag')
-		return parseString(issues.read())
+		return etree.fromstring(issues.read())
 
 	def getTodos(self):
 		try:
-			todos = map(self.issue2entry,
-				self.getDOM().documentElement.getElementsByTagName('issue'))
+			todos = map(self.issue2entry, self.getDOM().xpath('/issues/issue'))
 			output = StringIO()
 			cPickle.dump(todos, output, -1)
 			Config().setValue('redmine/cache', base64.b64encode(output.getvalue()))

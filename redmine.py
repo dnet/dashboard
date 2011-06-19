@@ -43,7 +43,7 @@ class Redmine:
 		self.url = unicode(Config().value('redmine/url').toString())
 		if urlparse.urlparse(self.url).scheme == '':
 			raise Exception('Redmine URL is invalid or empty')
-		self.urlbase = self.url[:self.url.index('.xml')] + '/'
+		self.urlbase = self.url.split('.xml', 1)[0] + '/'
 
 	def issue2entry(self, issue):
 		dd = issue.xpath('due_date/text()')

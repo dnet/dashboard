@@ -30,7 +30,7 @@ from config import Config
 from lxml import etree
 import urllib2
 import urlparse
-import datetime
+from datetime import datetime
 import cPickle
 from StringIO import StringIO
 import base64
@@ -51,7 +51,7 @@ class Redmine:
 		if not dd:
 			dl = None
 		else:
-			dl = datetime.datetime.strptime(dd[0], '%Y-%m-%d').date()
+			dl = datetime.strptime(dd[0], '%Y-%m-%d').date()
 		return {
 			'subtitle': issue.xpath('project/@name')[0],
 			'title': issue.xpath('subject/text()')[0],

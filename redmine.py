@@ -32,7 +32,6 @@ import urllib2
 import urlparse
 from datetime import datetime
 import cPickle
-from StringIO import StringIO
 import base64
 
 def getCache():
@@ -73,9 +72,8 @@ class Redmine:
 	def getTodos(self):
 		try:
 			todos = map(self.issue2entry, self.getDOM().xpath('/issues/issue'))
-			output = StringIO()
-			cPickle.dump(todos, output, -1)
-			Config().setValue('redmine/cache', base64.b64encode(output.getvalue()))
+			Config().setValue('redmine/cache',
+					base64.b64encode(cPickle.dumps(todos, -1)))
 		except urllib2.HTTPError as e:
 			if e.code != 304:
 				raise

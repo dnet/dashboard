@@ -27,19 +27,20 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import with_statement
-from django.template import Template, Context
-from django.conf import settings
+from itertools import imap
+from hashlib import sha1
 from config import Config
 import datetime
 import sys
+import os
 
 def loadcfg():
 	cfg = Config()
-	ckeys = ['modules', 'output', 'template']
+	ckeys = ['modules', 'output', 'template', 'thash']
 	cvals = dict()
 	for key in ckeys:
 		cvals[key] = str(cfg.value('core/' + key).toString())
-		if cvals[key] == '':
+		if cvals[key] == '' and key != 'thash':
 			print 'Key %s is not configured, check your configuration!' % key
 			sys.exit(1)
 	return cvals
@@ -66,16 +67,26 @@ def getTodos(acc, module):
 		todo['late'] = todo['deadline_cmp'] < now
 	return acc + mlist
 
+def serializeTodo(todo):
+	return '\t'.join('%s:%s' % i for i in sorted(todo.iteritems()) if i[0] != 'deadline_cmp')
+
 cvals = loadcfg()
 mods = [getattr(__import__(m), m.capitalize())() for m in cvals['modules'].split(',')]
 todos = reduce(getTodos, mods, [])
 todos.sort(lambda x, y: cmp(x['deadline_cmp'], y['deadline_cmp']))
+tstr = '\n'.join(imap(serializeTodo, todos))
+thash = sha1(tstr.encode('utf-8')).hexdigest()
 
-tpl = None
-settings.configure()
-with open(cvals['template'], 'r') as f:
-	tpl = Template(f.read())
+if cvals['thash'] != thash or not os.path.exists(cvals['output']):
+	from django.template import Template, Context
+	from django.conf import settings
 
-html = tpl.render(Context({'todos': todos}))
-with open(cvals['output'], 'w') as f:
-	f.write(html.encode('utf-8'))
+	tpl = None
+	settings.configure()
+	with open(cvals['template'], 'r') as f:
+		tpl = Template(f.read())
+
+	html = tpl.render(Context({'todos': todos}))
+	with open(cvals['output'], 'w') as f:
+		f.write(html.encode('utf-8'))
+	Config().setValue('core/thash', thash)

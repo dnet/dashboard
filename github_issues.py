@@ -49,9 +49,10 @@ class Github_issues:
 HTML_RE = re.compile('github.com/[^/]+/([^/]+)/issues')
 def issue2entry(issue):
 	url = issue['html_url']
+	due = issue['created_at']
 	return {
 			'subtitle': HTML_RE.search(url).group(1),
 			'title': issue['title'],
 			'link': url,
-			'deadline': datetime.strptime(issue['created_at'], '%Y-%m-%dT%H:%M:%SZ'),
+			'deadline': datetime.strptime(due, '%Y-%m-%dT%H:%M:%SZ'),
 			}

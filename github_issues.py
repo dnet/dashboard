@@ -49,7 +49,10 @@ class Github_issues:
 HTML_RE = re.compile('github.com/[^/]+/([^/]+)/issues')
 def issue2entry(issue):
 	url = issue['html_url']
-	due = issue['created_at']
+	try:
+		due = issue['milestone']['due_on']
+	except KeyError:
+		due = issue['created_at']
 	return {
 			'subtitle': HTML_RE.search(url).group(1),
 			'title': issue['title'],

@@ -65,7 +65,7 @@ class Imapflag:
 	def processMessage(self, msg_id):
 		_, data = self.imap.fetch(msg_id, '(BODY[HEADER.FIELDS (DATE FROM SUBJECT)])')
 		datestr, fromstr, subjectstr = sorted(ifilter(None,
-			data[0][1].replace('\r', '').split('\n')))
+			data[0][1].replace('\r', '').replace('\n ', ' ').split('\n')))
 		date = datetime.fromtimestamp(mktime_tz(parsedate_tz(datestr[6:])))
 		subject = unicode_header(subjectstr)
 		fromaddr = unicode_header(fromstr)

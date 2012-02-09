@@ -27,7 +27,8 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import with_statement
-from itertools import imap
+from itertools import imap, chain
+from operator import itemgetter
 from hashlib import sha1
 from config import Config
 import datetime
@@ -53,7 +54,7 @@ def ensureDateTime(value, default, deftime):
 	else:
 		return value
 
-def getTodos(acc, module):
+def getTodos(module):
 	mlist = module.getTodos()
 	cn = module.__class__.__name__
 	noon = datetime.time(12)
@@ -65,15 +66,14 @@ def getTodos(acc, module):
 			lambda default, field: ensureDateTime(todo.get(field, default), default, noon),
 			['scheduled', 'deadline'], dl)
 		todo['late'] = todo['deadline_cmp'] < now
-	return acc + mlist
+		yield todo
 
 def serializeTodo(todo):
 	return '\t'.join('%s:%s' % i for i in sorted(todo.iteritems()) if i[0] != 'deadline_cmp')
 
 cvals = loadcfg()
 mods = [getattr(__import__(m), m.capitalize())() for m in cvals['modules'].split(',')]
-todos = reduce(getTodos, mods, [])
-todos.sort(lambda x, y: cmp(x['deadline_cmp'], y['deadline_cmp']))
+todos = sorted(chain.from_iterable(imap(getTodos, mods)), key=itemgetter('deadline_cmp'))
 tstr = '\n'.join(imap(serializeTodo, todos))
 thash = sha1(tstr.encode('utf-8')).hexdigest()
 

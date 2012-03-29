@@ -28,7 +28,7 @@
 
 from config import Config
 from lxml import etree
-import urllib2
+import requests
 import urlparse
 from datetime import datetime
 import cPickle
@@ -37,6 +37,9 @@ import base64
 def getCache():
 	return cPickle.loads(base64.b64decode(str(
 		Config().value('redmine/cache').toString())))
+
+class NotModified(RuntimeError):
+	pass
 
 class Redmine:
 	def __init__(self):
@@ -60,24 +63,21 @@ class Redmine:
 
 	def getDOM(self):
 		cfg = Config()
-		req = urllib2.Request(self.url)
-		req.add_header('If-None-Match', str(cfg.value('redmine/etag').toString()))
-		issues = urllib2.urlopen(req)
+		etag = str(cfg.value('redmine/etag').toString())
+		issues = requests.get(self.url, headers={'If-None-Match': etag})
 		try:
-			cfg.setValue('redmine/etag', issues.info()['ETag'])
+			cfg.setValue('redmine/etag', issues.headers['etag'])
 		except:
 			cfg.remove('redmine/etag')
-		return etree.fromstring(issues.read())
+		if issues.status_code == 304:
+			raise NotModified()
+		return etree.parse(issues.raw)
 
 	def getTodos(self):
 		try:
 			todos = map(self.issue2entry, self.getDOM().xpath('/issues/issue'))
 			Config().setValue('redmine/cache',
 					base64.b64encode(cPickle.dumps(todos, -1)))
-		except urllib2.HTTPError as e:
-			if e.code != 304:
-				raise
-			todos = getCache()
-		except urllib2.URLError as e:
+		except NotModified:
 			todos = getCache()
 		return todos

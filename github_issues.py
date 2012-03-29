@@ -27,23 +27,21 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 from config import Config
-from urllib2 import Request, urlopen
 from base64 import b64encode
 from datetime import datetime
-import json, re
+import json, re, requests
 
 CFGS = ['user', 'passwd']
 
 class Github_issues:
 	def __init__(self):
 		cfg = Config()
-		basic_secret = 'Basic ' + b64encode(':'.join(
+		self.session = requests.session(auth=tuple(
 			str(cfg.value('github_issues/' + key).toString()) for key in CFGS))
-		self.request = Request('https://api.github.com/issues', None,
-				{'Authorization': basic_secret})
 
 	def getTodos(self):
-		return map(issue2entry, json.load(urlopen(self.request)))
+		issues = self.session.get('https://api.github.com/issues')
+		return map(issue2entry, json.loads(issues.content))
 
 
 HTML_RE = re.compile('github.com/[^/]+/([^/]+)/issues')

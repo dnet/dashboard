@@ -34,4 +34,5 @@ Dependencies
  - Python 2.x (tested on 2.5)
  - PyQt4 (Debian/Ubuntu package: `python-qt4`)
  - Django (Debian/Ubuntu package: `python-django`)
+ - requests (http://docs.python-requests.org/)
  - aleph-python-api (for `aleph_loaned` module only, https://github.com/dnet/aleph-python-api)

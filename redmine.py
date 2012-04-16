@@ -80,4 +80,6 @@ class Redmine:
 					base64.b64encode(cPickle.dumps(todos, -1)))
 		except NotModified:
 			todos = getCache()
+		except requests.exceptions.ConnectionError:
+			todos = getCache()
 		return todos

@@ -81,7 +81,6 @@ if cvals['thash'] != thash or not os.path.exists(cvals['output']):
 	from django.template import Template, Context
 	from django.conf import settings
 
-	tpl = None
 	settings.configure()
 	with open(cvals['template'], 'r') as f:
 		tpl = Template(f.read())

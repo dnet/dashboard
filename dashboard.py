@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# dashboard.py - generates an HTML file from modules using django
+# dashboard.py - generates an HTML file from modules using jinja2
 #
 # Copyright (c) 2011 András Veres-Szentkirályi
 #
@@ -78,14 +78,12 @@ tstr = '\n'.join(imap(serializeTodo, todos))
 thash = sha1(tstr.encode('utf-8')).hexdigest()
 
 if cvals['thash'] != thash or not os.path.exists(cvals['output']):
-	from django.template import Template, Context
-	from django.conf import settings
+	from jinja2 import Template
 
-	settings.configure()
 	with open(cvals['template'], 'r') as f:
-		tpl = Template(f.read())
+		tpl = Template(f.read().decode('utf-8'))
 
-	html = tpl.render(Context({'todos': todos}))
+	html = tpl.render(todos=todos)
 	with open(cvals['output'], 'w') as f:
 		f.write(html.encode('utf-8'))
 	Config().setValue('core/thash', thash)

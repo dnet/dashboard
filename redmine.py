@@ -33,6 +33,7 @@ import urlparse
 from datetime import datetime
 import cPickle
 import base64
+import socket
 
 def getCache():
 	return cPickle.loads(base64.b64decode(str(
@@ -78,8 +79,6 @@ class Redmine:
 			todos = map(self.issue2entry, self.getDOM().xpath('/issues/issue'))
 			Config().setValue('redmine/cache',
 					base64.b64encode(cPickle.dumps(todos, -1)))
-		except NotModified:
-			todos = getCache()
-		except requests.exceptions.ConnectionError:
+		except (NotModified, requests.exceptions.ConnectionError, socket.error):
 			todos = getCache()
 		return todos

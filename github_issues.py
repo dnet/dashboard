@@ -49,7 +49,7 @@ def issue2entry(issue):
 	url = issue['html_url']
 	try:
 		due = issue['milestone']['due_on']
-	except KeyError:
+	except (KeyError, TypeError):
 		due = issue['created_at']
 	return {
 			'subtitle': HTML_RE.search(url).group(1),

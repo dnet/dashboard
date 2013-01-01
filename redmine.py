@@ -72,7 +72,7 @@ class Redmine:
 			cfg.remove('redmine/etag')
 		if issues.status_code == 304:
 			raise NotModified()
-		return etree.parse(issues.raw)
+		return etree.fromstring(issues.content)
 
 	def getTodos(self):
 		try:

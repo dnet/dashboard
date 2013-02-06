@@ -43,7 +43,7 @@ def loadcfg():
 		cvals[key] = str(cfg.value('core/' + key).toString())
 		if cvals[key] == '' and key != 'thash':
 			print 'Key %s is not configured, check your configuration!' % key
-			sys.exit(1)
+			raise SystemExit(1)
 	return cvals
 
 def ensureDateTime(value, default, deftime):

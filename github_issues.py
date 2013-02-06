@@ -27,7 +27,6 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 
 from config import Config
-from base64 import b64encode
 from datetime import datetime
 import json, re, requests
 

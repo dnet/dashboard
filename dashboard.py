@@ -32,7 +32,6 @@ from operator import itemgetter
 from hashlib import sha1
 from config import Config
 import datetime
-import sys
 import os
 
 def loadcfg():

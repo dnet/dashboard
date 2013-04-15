@@ -35,8 +35,9 @@ CFGS = ['user', 'passwd']
 class Github_issues:
 	def __init__(self):
 		cfg = Config()
-		self.session = requests.session(auth=tuple(
-			str(cfg.value('github_issues/' + key).toString()) for key in CFGS))
+		self.session = requests.Session()
+		self.session.auth = tuple(
+			str(cfg.value('github_issues/' + key).toString()) for key in CFGS)
 
 	def getTodos(self):
 		issues = self.session.get('https://api.github.com/issues')

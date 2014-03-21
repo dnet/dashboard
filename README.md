@@ -26,7 +26,7 @@ Module interface
 
 A module named `foobar` should be in a file named `foobar.py`. There should be at least one class named `Foobar` with a constructor that takes no parameters. An instance of this class must have a `getTodo()` method which also takes no parameters and returns the list of todos in the following format. Todos are stored as a list of dictionaries, each of these should contain at least a `title`, a `subtitle` and a `link` item.
 
-For persistence, the `Config` class in the `config` module should be used, which extends the `QSettings` class with a constructor that takes no parameters. This way, configuration is stored in a standard way, commonplace `QSettings` methods can and should be used, most frequently `setValue("group/key", value)` and `value("group/key")`. It stores configuration using a native method of the platform, such as `~/.config/dnet/dashboard.conf` on UNIX-like systems, and registry on Windows. Further information and reference can be found at http://doc.qt.nokia.com/qsettings.html.
+For persistence, the `Config` class in the `config` module should be used, which extends the `QSettings` class with a constructor that takes no parameters. This way, configuration is stored in a standard way, commonplace `QSettings` methods can and should be used, most frequently `setValue("group/key", value)` and `value("group/key")`. It stores configuration using a native method of the platform, such as `~/.config/dnet/dashboard.conf` on UNIX-like systems, and registry on Windows. Further information and reference can be found at http://qt-project.org/doc/qsettings.html.
 
 Dependencies
 ------------
